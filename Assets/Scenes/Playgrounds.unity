@@ -1061,7 +1061,7 @@ Transform:
   m_GameObject: {fileID: 487076847}
   m_LocalRotation: {x: 0.4999771, y: 0.5000229, z: 0.49997714, w: -0.50002295}
   m_LocalPosition: {x: 0.0011, y: 0.008, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 4.665574, y: 1.3996723, z: 1.3996723}
   m_Children: []
   m_Father: {fileID: 2032344023}
   m_RootOrder: 0
@@ -1098,7 +1098,7 @@ MonoBehaviour:
   flicker: 0.1
   flickerOffset: 0
   flickerSpeed: 50
-  throttle: 0
+  throttle: 1
 --- !u!212 &487076851
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1265,7 +1265,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 7049680, z: 4.585e-41, w: 0}
+  m_BoundingSphereOverride: {x: 1e-45, y: 9.4e-44, z: 0, w: 2.9223424e+9}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -4525,7 +4525,7 @@ Transform:
   m_GameObject: {fileID: 2032344022}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_Children:
   - {fileID: 487076848}
   m_Father: {fileID: 691106280}
@@ -4543,7 +4543,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be040c6f91c4a99449370928cc01c360, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throttle: 0
+  throttle: 1
   body: {fileID: 0}
   forceAtPosition: 0
   forceMode: 5
