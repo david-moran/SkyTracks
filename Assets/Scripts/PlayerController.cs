@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     private SgtThruster thruster;
 
     private float maxForwardSpeed = 50.0f;
-    private float slideSpeed = 40.0f;
+    private float maxSlideSpeed = 40.0f;
     public float throttling = 0.0f;
     public float brakingPower = 0.0f;
     private float jumpPower = 12.0f;
@@ -25,8 +25,8 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float jumpInput;
 
-    private Vector3 forwardVector;
-    private Vector3 slideVector;
+    private Vector3 velocity;
+    private Vector3 endPosition;
 
     private bool isGrounded;
     private float currentSpeed = 0.0f;
@@ -36,8 +36,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         thruster = GetComponentInChildren<SgtThruster>();
-        forwardVector = Vector3.zero;
-        slideVector = Vector3.zero;
+        velocity = Vector3.zero;
 
         camOffset = cam.transform.position - transform.position;
     }
@@ -47,20 +46,37 @@ public class PlayerController : MonoBehaviour
         isGrounded = true;
     }
 
-    private void CalculateForwardVector()
+    private float MaxOrMin(float value, float min, float max)
+    {
+        if (value > max)
+        {
+            return max;
+        } else if (value < min)
+        {
+            return min;
+        }
+        return value;
+    }
+
+    private void CalculateVelocity()
     {
         currentSpeed = verticalInput > 0
             ? Mathf.Lerp(currentSpeed, maxForwardSpeed * verticalInput, 0.01f)
             : currentSpeed = Mathf.Max(0,
                 Mathf.Lerp(currentSpeed, maxForwardSpeed * verticalInput, 1f));
 
-        forwardVector = Vector3.forward * currentSpeed * Time.deltaTime;
+        // Horizontal + Vertical speed vector
+        var wanted = Vector3.forward * currentSpeed +
+            Vector3.right * horizontalInput * maxSlideSpeed;
+
+        var sum = rb.velocity + wanted;
+        velocity = new Vector3(
+            MaxOrMin(sum.x, -maxSlideSpeed, maxSlideSpeed) * Mathf.Abs(horizontalInput),
+            rb.velocity.y,
+            MaxOrMin(sum.z, -maxForwardSpeed, maxForwardSpeed)
+        ) ;
     }
 
-    private void CalculateSlideVector()
-    {
-        slideVector = Vector3.right * horizontalInput * Time.deltaTime * slideSpeed;
-    }
 
     // Update is called once per frame
     void Update()
@@ -80,24 +96,20 @@ public class PlayerController : MonoBehaviour
         }
         jumpInput = Input.GetAxis("Jump");
 
-        CalculateForwardVector();
-        CalculateSlideVector();
-
         thruster.Throttle = currentSpeed / maxForwardSpeed;
-
-        // Apply lateral movement
-        transform.Translate(forwardVector + slideVector);
     }
 
     private void FixedUpdate()
     {
+        CalculateVelocity();
         rb.AddForce(Physics.gravity * 10);
+        rb.velocity = velocity;
         transform.rotation = Quaternion.identity;
 
         // Jump
         if (isGrounded && jumpInput > 0)
         {
-            rb.AddForce((Vector3.up + forwardVector + slideVector) * jumpPower, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
             isGrounded = false;
         }
     }
