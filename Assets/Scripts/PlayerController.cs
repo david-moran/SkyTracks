@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using SpaceGraphicsToolkit;
 
@@ -9,6 +11,9 @@ public class PlayerController : MonoBehaviour
 {
     public Camera cam;
     private Vector3 camOffset;
+
+    public Text scoreObject;
+    public Text gameOver;
 
     private Rigidbody rb;
     private SgtThruster thruster;
@@ -25,6 +30,10 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float jumpInput;
 
+    private int score;
+
+    private bool updateScore = true;
+
     private Vector3 velocity;
     private Vector3 endPosition;
 
@@ -37,8 +46,8 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         thruster = GetComponentInChildren<SgtThruster>();
         velocity = Vector3.zero;
-
         camOffset = cam.transform.position - transform.position;
+        gameOver.enabled = false;
     }
 
     private void OnCollisionStay(Collision collision)
@@ -77,6 +86,12 @@ public class PlayerController : MonoBehaviour
         ) ;
     }
 
+    private void UpdateScore()
+    {
+        if (scoreObject != null && updateScore)
+            scoreObject.text = string.Format("{0}", score);
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -95,12 +110,13 @@ public class PlayerController : MonoBehaviour
             horizontalInput = 0;
         }
         jumpInput = Input.GetAxis("Jump");
-
+        score = (int) transform.position.z * 15;
         thruster.Throttle = currentSpeed / maxForwardSpeed;
     }
 
     private void FixedUpdate()
     {
+        CheckGameOver();
         CalculateVelocity();
         rb.AddForce(Physics.gravity * 10);
         rb.velocity = velocity;
@@ -120,5 +136,41 @@ public class PlayerController : MonoBehaviour
             0 + camOffset.x,
             0 + camOffset.y,
             transform.position.z + camOffset.z);
+
+        UpdateScore();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Block")
+        {
+            if (collision.collider.bounds.max.y > transform.position.y)
+            {
+                GameOver();
+            }
+        }
+    }
+
+    private void CheckGameOver()
+    {
+        if (transform.position.y < -30)
+        {
+            GameOver();
+        }
+    }
+
+    public async void GameOver()
+    {
+        if (!gameOver.enabled)
+        {
+            gameOver.enabled = true;
+            updateScore = false;
+            await Task.Delay(3000);
+            gameOver.enabled = false;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            transform.position = new Vector3(0, 2, 0.5f);
+            updateScore = true;
+        }
     }
 }
